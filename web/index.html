@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Northstar | Job Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">N</span><span>northstar</span></div>
+      <div class="sidebar-label">Workspace</div>
+      <nav><a class="nav-item active" href="#applications"><span>▦</span> Applications</a><a class="nav-item" href="#insights"><span>◒</span> Insights</a></nav>
+      <div class="sidebar-foot"><div class="profile-avatar">JS</div><div><strong>Job seeker</strong><small>Personal workspace</small></div></div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar"><div><p class="eyebrow">CAREER COMMAND CENTER</p><h1>Applications</h1></div><button class="primary-button" id="add-job"><span>+</span> Add application</button></header>
+      <section class="stats-grid" aria-label="Application statistics">
+        <article class="stat-card"><div class="stat-icon blue">◫</div><div><span class="stat-label">Total applications</span><strong id="stat-total">—</strong></div><small class="stat-trend">All time</small></article>
+        <article class="stat-card"><div class="stat-icon amber">◷</div><div><span class="stat-label">In progress</span><strong id="stat-progress">—</strong></div><small class="stat-trend">Interview + applied</small></article>
+        <article class="stat-card"><div class="stat-icon green">↗</div><div><span class="stat-label">Offers</span><strong id="stat-offers">—</strong></div><small class="stat-trend">Keep going</small></article>
+        <article class="stat-card"><div class="stat-icon coral">%</div><div><span class="stat-label">Response rate</span><strong id="stat-response">—</strong></div><small class="stat-trend">Interviews / total</small></article>
+      </section>
+      <section class="workspace-panel" id="applications">
+        <div class="panel-heading"><div><h2>Your applications</h2><p>Keep every opportunity moving forward.</p></div><div class="view-toggle"><button class="view-button active" data-view="table" title="Table view">☷</button><button class="view-button" data-view="cards" title="Card view">▦</button></div></div>
+        <div class="toolbar"><label class="search-box"><span>⌕</span><input id="search" type="search" placeholder="Search company or role" aria-label="Search applications"></label><select id="status-filter" aria-label="Filter by status"><option value="All">All statuses</option><option>Applied</option><option>Interview</option><option>Rejected</option><option>Offer</option></select><select id="sort-date" aria-label="Sort by date"><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select></div>
+        <div id="feedback" class="feedback" hidden></div><div id="loading" class="loading"><span class="spinner"></span> Loading applications...</div>
+        <div id="empty" class="empty-state" hidden><div class="empty-icon">✦</div><h3>No applications yet</h3><p>Start building your pipeline by adding your first application.</p><button class="primary-button" id="empty-add">Add application</button></div>
+        <div id="table-wrap" class="table-wrap" hidden><table><thead><tr><th>Company</th><th>Role</th><th>Location</th><th>Date applied</th><th>Status</th><th></th></tr></thead><tbody id="jobs-table"></tbody></table></div>
+        <div id="cards-wrap" class="cards-wrap" hidden></div>
+      </section>
+    </main>
+  </div>
+  <dialog id="job-dialog"><form method="dialog" id="job-form"><div class="modal-head"><div><p class="eyebrow">OPPORTUNITY DETAILS</p><h2 id="modal-title">Add application</h2></div><button type="button" class="icon-button" id="close-modal" aria-label="Close">×</button></div><input type="hidden" id="job-id"><div class="form-grid"><label>Company *<input id="company" required maxlength="120"></label><label>Role *<input id="role" required maxlength="120"></label><label>Location<input id="location" maxlength="120"></label><label>Salary<input id="salary" placeholder="e.g. $120k - $145k" maxlength="80"></label><label>Application URL<input id="applicationUrl" type="url" placeholder="https://..."></label><label>Status *<select id="status" required><option>Applied</option><option>Interview</option><option>Rejected</option><option>Offer</option></select></label><label>Date applied *<input id="dateApplied" type="date" required></label><label class="full-width">Notes<textarea id="notes" rows="4" maxlength="1000"></textarea></label></div><div class="modal-actions"><button type="button" class="secondary-button" id="cancel-modal">Cancel</button><button class="primary-button" id="save-job">Save application</button></div></form></dialog>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

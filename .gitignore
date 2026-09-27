@@ -1,0 +1,7 @@
+out/
+*.class
+server.log
+server-error.log
+.idea/
+.vscode/
+.DS_Store
