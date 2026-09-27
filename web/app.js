@@ -1,4 +1,7 @@
-const API_BASE = (window.JOB_TRACKER_API_BASE || '').replace(/\/$/, '');
+const queryApi = new URLSearchParams(window.location.search).get('api');
+const savedApi = window.localStorage.getItem('job-tracker-api-base');
+const API_BASE = (queryApi || savedApi || window.JOB_TRACKER_API_BASE || '').replace(/\/$/, '');
+if (queryApi) window.localStorage.setItem('job-tracker-api-base', API_BASE);
 const API = `${API_BASE}/api/jobs`;
 const state = { jobs: [], view: 'table', editingId: null };
 const $ = (id) => document.getElementById(id);
@@ -28,7 +31,7 @@ function render() {
   if (state.jobs.length > 0 && jobs.length === 0) { $('table-wrap').hidden = false; $('jobs-table').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:50px;color:#8492a5">No applications match your filters.</td></tr>`; }
 }
 function formatDate(value) { if (!value) return '—'; return new Intl.DateTimeFormat('en', { month:'short', day:'numeric', year:'numeric' }).format(new Date(`${value}T00:00:00`)); }
-async function loadJobs() { clearError(); $('loading').hidden = false; try { state.jobs = await request(); render(); } catch (error) { $('loading').hidden = true; showError(error.message); } }
+async function loadJobs() { clearError(); $('loading').hidden = false; try { state.jobs = await request(); render(); } catch (error) { $('loading').hidden = true; showError(`${error.message} API: ${API}. Set BACKEND_URL in GitHub Actions, or open the site with ?api=https://your-backend-url.`); } }
 function openModal(job = null) { state.editingId = job?.id || null; $('modal-title').textContent = job ? 'Edit application' : 'Add application'; $('save-job').textContent = job ? 'Save changes' : 'Save application'; fields.forEach(field => $(field).value = job?.[field] || (field === 'status' ? 'Applied' : '')); if (!job) $('dateApplied').value = new Date().toISOString().slice(0,10); $('job-dialog').showModal(); $('company').focus(); }
 function closeModal() { $('job-dialog').close(); }
 async function saveJob(event) { event.preventDefault(); const payload = Object.fromEntries(fields.map(field => [field, $(field).value.trim()])); const button = $('save-job'); button.disabled = true; button.textContent = 'Saving...'; try { if (state.editingId) await request(`${API}/${state.editingId}`, { method:'PUT', body:JSON.stringify(payload) }); else await request(API, { method:'POST', body:JSON.stringify(payload) }); closeModal(); await loadJobs(); } catch (error) { showError(error.message); } finally { button.disabled = false; button.textContent = state.editingId ? 'Save changes' : 'Save application'; } }

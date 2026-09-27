@@ -60,6 +60,14 @@ java -cp out Main 9090
 
 The API persists every change immediately to `data/jobs.json`.
 
+If the frontend is already deployed and you need to connect it immediately, open it once with the backend URL as a query parameter:
+
+```text
+https://shaury-rgb.github.io/job-tracker/?api=https://your-backend.example.com
+```
+
+The browser remembers that URL. For the permanent deployment, set the GitHub Actions repository variable `BACKEND_URL` described below and redeploy the Pages workflow.
+
 ## Deploy from GitHub
 
 GitHub Pages can host the frontend, but it cannot run the Java `HttpServer`. For a fully functional public deployment, deploy the backend from this repository to a Docker-capable host with persistent storage, then deploy the frontend to GitHub Pages.
