@@ -2,33 +2,36 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class JobApplication {
-    public String id;
-    public String company;
-    public String role;
-    public String location;
-    public String salary;
-    public String applicationUrl;
-    public String status;
-    public String dateApplied;
-    public String notes;
+    public String id = "";
+    public String userId = "";
+    public String company = "";
+    public String role = "";
+    public String location = "";
+    public String salary = "";
+    public String applicationUrl = "";
+    public String status = "Applied";
+    public String dateApplied = "";
+    public String notes = "";
 
     public Map<String, Object> toMap() {
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("id", id);
-        map.put("company", company);
-        map.put("role", role);
-        map.put("location", location);
-        map.put("salary", salary);
-        map.put("applicationUrl", applicationUrl);
-        map.put("status", status);
-        map.put("dateApplied", dateApplied);
-        map.put("notes", notes);
+        map.put("id", id == null ? "" : id);
+        map.put("userId", userId == null ? "" : userId);
+        map.put("company", company == null ? "" : company);
+        map.put("role", role == null ? "" : role);
+        map.put("location", location == null ? "" : location);
+        map.put("salary", salary == null ? "" : salary);
+        map.put("applicationUrl", applicationUrl == null ? "" : applicationUrl);
+        map.put("status", status == null ? "" : status);
+        map.put("dateApplied", dateApplied == null ? "" : dateApplied);
+        map.put("notes", notes == null ? "" : notes);
         return map;
     }
 
     public static JobApplication fromMap(Map<String, Object> map) {
         JobApplication job = new JobApplication();
         job.id = value(map, "id");
+        job.userId = value(map, "userId");
         job.company = value(map, "company");
         job.role = value(map, "role");
         job.location = value(map, "location");

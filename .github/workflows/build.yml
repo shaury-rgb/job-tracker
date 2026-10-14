@@ -1,4 +1,4 @@
-name: Build Java backend
+name: Build and test Java backend
 
 on:
   push:
@@ -14,4 +14,6 @@ jobs:
           distribution: temurin
           java-version: '17'
       - name: Compile
-        run: mkdir -p out && javac -d out src/*.java
+        run: mkdir -p out && javac -Xlint:unchecked -d out src/*.java
+      - name: Run Test Suite
+        run: java -cp out TestRunner

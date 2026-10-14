@@ -10,7 +10,16 @@ public final class Json {
     }
 
     public static Object parse(String input) {
-        return new Parser(input).parseValue();
+        if (input == null) {
+            throw new IllegalArgumentException("JSON input cannot be null");
+        }
+        Parser parser = new Parser(input);
+        Object value = parser.parseValue();
+        parser.skipWhitespace();
+        if (parser.hasRemaining()) {
+            throw parser.error("Unexpected trailing data");
+        }
+        return value;
     }
 
     public static String stringify(Object value) {
@@ -68,8 +77,17 @@ public final class Json {
                     out.append("\\r");
                 case '\t' ->
                     out.append("\\t");
-                default ->
-                    out.append(c);
+                case '\b' ->
+                    out.append("\\b");
+                case '\f' ->
+                    out.append("\\f");
+                default -> {
+                    if (c < 0x20) {
+                        out.append(String.format("\\u%04x", (int) c));
+                    } else {
+                        out.append(c);
+                    }
+                }
             }
         }
         return out.append('"').toString();
@@ -205,13 +223,25 @@ public final class Json {
             throw error("Unterminated string");
         }
 
+        boolean hasRemaining() {
+            return position < input.length();
+        }
+
         private Number parseNumber() {
             int start = position;
             while (position < input.length() && "-+.0123456789eE".indexOf(input.charAt(position)) >= 0) {
                 position++;
             }
+            String raw = input.substring(start, position);
             try {
-                return Double.parseDouble(input.substring(start, position));
+                if (!raw.contains(".") && !raw.contains("e") && !raw.contains("E")) {
+                    try {
+                        return Long.parseLong(raw);
+                    } catch (NumberFormatException ignored) {
+                        // fallback to double for very large numbers
+                    }
+                }
+                return Double.parseDouble(raw);
             } catch (NumberFormatException e) {
                 throw error("Invalid number");
             }

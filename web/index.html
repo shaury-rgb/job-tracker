@@ -11,28 +11,377 @@
     <aside class="sidebar">
       <div class="brand"><span class="brand-mark">N</span><span>northstar</span></div>
       <div class="sidebar-label">Workspace</div>
-      <nav><a class="nav-item active" href="#applications"><span>▦</span> Applications</a><a class="nav-item" href="#insights"><span>◒</span> Insights</a></nav>
-      <div class="sidebar-foot"><div class="profile-avatar">JS</div><div><strong>Job seeker</strong><small>Personal workspace</small></div></div>
+      <nav>
+        <a class="nav-item active" href="#applications" id="nav-applications"><span>▦</span> Applications</a>
+        <a class="nav-item" href="#insights" id="nav-insights"><span>◒</span> Insights</a>
+      </nav>
+      <div class="sidebar-data-actions">
+        <div class="sidebar-label" style="margin:24px 12px 10px">Data</div>
+        <button type="button" class="sidebar-action-btn" id="export-json" title="Download backup as JSON"><span>⇣</span> Export data</button>
+        <button type="button" class="sidebar-action-btn" id="import-trigger" title="Restore applications from JSON file"><span>⇡</span> Import data</button>
+        <input type="file" id="import-file" accept=".json" style="display:none">
+        <button type="button" class="sidebar-action-btn" id="seed-sample-btn" title="Populate realistic demo applications"><span>✦</span> Load demo data</button>
+      </div>
+      <div class="sidebar-foot" id="user-profile-section">
+        <div class="profile-avatar" id="user-avatar">JS</div>
+        <div class="user-meta-wrap">
+          <strong id="user-name-display">Alex Mercer</strong>
+          <small id="user-email-display">demo@northstar.app</small>
+        </div>
+        <button type="button" class="icon-button signout-btn" id="logout-btn" title="Sign out" aria-label="Sign out">↳</button>
+      </div>
     </aside>
+
     <main class="main-content">
-      <header class="topbar"><div><p class="eyebrow">CAREER COMMAND CENTER</p><h1>Applications</h1></div><button class="primary-button" id="add-job"><span>+</span> Add application</button></header>
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">CAREER COMMAND CENTER</p>
+          <h1 id="page-heading">Applications</h1>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" class="secondary-button" id="open-auth-btn" style="display:none">Sign In / Register</button>
+          <button class="primary-button" id="add-job"><span>+</span> Add application</button>
+        </div>
+      </header>
+
+      <!-- KPI Summary Cards -->
       <section class="stats-grid" aria-label="Application statistics">
-        <article class="stat-card"><div class="stat-icon blue">◫</div><div><span class="stat-label">Total applications</span><strong id="stat-total">—</strong></div><small class="stat-trend">All time</small></article>
-        <article class="stat-card"><div class="stat-icon amber">◷</div><div><span class="stat-label">In progress</span><strong id="stat-progress">—</strong></div><small class="stat-trend">Interview + applied</small></article>
-        <article class="stat-card"><div class="stat-icon green">↗</div><div><span class="stat-label">Offers</span><strong id="stat-offers">—</strong></div><small class="stat-trend">Keep going</small></article>
-        <article class="stat-card"><div class="stat-icon coral">%</div><div><span class="stat-label">Response rate</span><strong id="stat-response">—</strong></div><small class="stat-trend">Interviews / total</small></article>
+        <article class="stat-card">
+          <div class="stat-icon blue">◫</div>
+          <div><span class="stat-label">Total applications</span><strong id="stat-total">—</strong></div>
+          <small class="stat-trend">All time pipeline</small>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon amber">◷</div>
+          <div><span class="stat-label">In progress</span><strong id="stat-progress">—</strong></div>
+          <small class="stat-trend">Applied + interviews</small>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon green">↗</div>
+          <div><span class="stat-label">Offers secured</span><strong id="stat-offers">—</strong></div>
+          <small class="stat-trend">Keep momentum</small>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon coral">%</div>
+          <div><span class="stat-label">Positive response</span><strong id="stat-response">—</strong></div>
+          <small class="stat-trend">Interviews & offers / total</small>
+        </article>
       </section>
-      <section class="workspace-panel" id="applications">
-        <div class="panel-heading"><div><h2>Your applications</h2><p>Keep every opportunity moving forward.</p></div><div class="view-toggle"><button class="view-button active" data-view="table" title="Table view">☷</button><button class="view-button" data-view="cards" title="Card view">▦</button></div></div>
-        <div class="toolbar"><label class="search-box"><span>⌕</span><input id="search" type="search" placeholder="Search company or role" aria-label="Search applications"></label><select id="status-filter" aria-label="Filter by status"><option value="All">All statuses</option><option>Applied</option><option>Interview</option><option>Rejected</option><option>Offer</option></select><select id="sort-date" aria-label="Sort by date"><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select></div>
-        <div id="feedback" class="feedback" hidden></div><div id="loading" class="loading"><span class="spinner"></span> Loading applications...</div>
-        <div id="empty" class="empty-state" hidden><div class="empty-icon">✦</div><h3>No applications yet</h3><p>Start building your pipeline by adding your first application.</p><button class="primary-button" id="empty-add">Add application</button></div>
-        <div id="table-wrap" class="table-wrap" hidden><table><thead><tr><th>Company</th><th>Role</th><th>Location</th><th>Date applied</th><th>Status</th><th></th></tr></thead><tbody id="jobs-table"></tbody></table></div>
+
+      <!-- Global page feedback banner -->
+      <div id="feedback" class="feedback" hidden></div>
+      <div id="loading" class="loading"><span class="spinner"></span> Loading applications...</div>
+
+      <!-- Applications Panel -->
+      <section class="workspace-panel" id="applications-panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Your applications</h2>
+            <p>Keep every opportunity moving forward.</p>
+          </div>
+          <div class="panel-actions-group">
+            <div class="view-toggle">
+              <button class="view-button active" data-view="table" title="Table view" aria-label="Table view">☷</button>
+              <button class="view-button" data-view="cards" title="Card view" aria-label="Card view">▦</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <label class="search-box">
+            <span>⌕</span>
+            <input id="search" type="search" placeholder="Search company, role, location, notes..." aria-label="Search applications">
+          </label>
+          <select id="status-filter" aria-label="Filter by status">
+            <option value="All">All statuses</option>
+            <option value="Applied">Applied</option>
+            <option value="Interview">Interview</option>
+            <option value="Offer">Offer</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+          <select id="sort-date" aria-label="Sort applications">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="company_asc">Company (A-Z)</option>
+            <option value="company_desc">Company (Z-A)</option>
+          </select>
+        </div>
+
+        <!-- Empty state when database has 0 applications -->
+        <div id="empty" class="empty-state" hidden>
+          <div class="empty-icon">✦</div>
+          <h3>No applications yet</h3>
+          <p>Start building your career pipeline by tracking your first application.</p>
+          <div class="empty-actions">
+            <button class="primary-button" id="empty-add"><span>+</span> Add first application</button>
+            <button class="secondary-button" id="empty-sample">Load demo data</button>
+          </div>
+        </div>
+
+        <!-- Filter empty state (when search has 0 matches) -->
+        <div id="filter-empty" class="empty-state filter-empty-state" hidden>
+          <div class="empty-icon">⌕</div>
+          <h3>No matching applications</h3>
+          <p>Try adjusting your search query or status filter.</p>
+          <button class="secondary-button" id="clear-filters-btn">Clear filters</button>
+        </div>
+
+        <!-- Table view container -->
+        <div id="table-wrap" class="table-wrap" hidden>
+          <table>
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Role</th>
+                <th>Location</th>
+                <th>Compensation</th>
+                <th>Date applied</th>
+                <th>Status</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="jobs-table"></tbody>
+          </table>
+        </div>
+
+        <!-- Cards view container -->
         <div id="cards-wrap" class="cards-wrap" hidden></div>
+      </section>
+
+      <!-- Insights Panel -->
+      <section class="workspace-panel" id="insights-panel" hidden>
+        <div class="panel-heading">
+          <div>
+            <h2>Pipeline Insights</h2>
+            <p>Conversion metrics, status distributions, and strategic recommendations.</p>
+          </div>
+        </div>
+
+        <div class="insights-grid">
+          <!-- Funnel Card -->
+          <article class="insight-card">
+            <h3>Conversion Funnel</h3>
+            <p class="insight-subtitle">Progression through application stages</p>
+            <div class="funnel-container">
+              <div class="funnel-step">
+                <div class="funnel-label-row">
+                  <span>1. Applied</span>
+                  <strong id="funnel-applied-count">0</strong>
+                </div>
+                <div class="funnel-bar-bg"><div class="funnel-bar-fill blue" id="funnel-applied-bar" style="width:100%"></div></div>
+              </div>
+              <div class="funnel-arrow">↓ <span id="funnel-interview-rate">0% interview rate</span></div>
+              <div class="funnel-step">
+                <div class="funnel-label-row">
+                  <span>2. Interviews Secured</span>
+                  <strong id="funnel-interview-count">0</strong>
+                </div>
+                <div class="funnel-bar-bg"><div class="funnel-bar-fill amber" id="funnel-interview-bar" style="width:0%"></div></div>
+              </div>
+              <div class="funnel-arrow">↓ <span id="funnel-offer-rate">0% offer conversion</span></div>
+              <div class="funnel-step">
+                <div class="funnel-label-row">
+                  <span>3. Offers Received</span>
+                  <strong id="funnel-offer-count">0</strong>
+                </div>
+                <div class="funnel-bar-bg"><div class="funnel-bar-fill green" id="funnel-offer-bar" style="width:0%"></div></div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Status Distribution Card -->
+          <article class="insight-card">
+            <h3>Status Distribution</h3>
+            <p class="insight-subtitle">Breakdown across all active and past applications</p>
+            <div class="distribution-stacked" id="distribution-bar"></div>
+            <div class="distribution-legend" id="distribution-legend"></div>
+          </article>
+
+          <!-- Workplace Distribution Card -->
+          <article class="insight-card">
+            <h3>Work Model & Locations</h3>
+            <p class="insight-subtitle">Remote vs In-person / Hybrid opportunities</p>
+            <div class="work-model-stats">
+              <div class="work-model-item">
+                <span class="work-model-dot remote"></span>
+                <div>
+                  <strong id="remote-count">0</strong>
+                  <small>Remote roles</small>
+                </div>
+              </div>
+              <div class="work-model-item">
+                <span class="work-model-dot onsite"></span>
+                <div>
+                  <strong id="onsite-count">0</strong>
+                  <small>Onsite / Hybrid roles</small>
+                </div>
+              </div>
+            </div>
+            <div class="salary-disclosure-note" id="salary-disclosure-text">
+              0 of 0 applications include salary information.
+            </div>
+          </article>
+
+          <!-- Strategy Recommendation Card -->
+          <article class="insight-card insight-recommendation-card">
+            <h3>Strategic Recommendation</h3>
+            <p class="insight-subtitle">Actionable advice based on your current pipeline</p>
+            <div class="recommendation-box" id="pipeline-recommendation">
+              <!-- Dynamically populated -->
+            </div>
+          </article>
+        </div>
       </section>
     </main>
   </div>
-  <dialog id="job-dialog"><form method="dialog" id="job-form"><div class="modal-head"><div><p class="eyebrow">OPPORTUNITY DETAILS</p><h2 id="modal-title">Add application</h2></div><button type="button" class="icon-button" id="close-modal" aria-label="Close">×</button></div><input type="hidden" id="job-id"><div class="form-grid"><label>Company *<input id="company" required maxlength="120"></label><label>Role *<input id="role" required maxlength="120"></label><label>Location<input id="location" maxlength="120"></label><label>Salary<input id="salary" placeholder="e.g. $120k - $145k" maxlength="80"></label><label>Application URL<input id="applicationUrl" type="url" placeholder="https://..."></label><label>Status *<select id="status" required><option>Applied</option><option>Interview</option><option>Rejected</option><option>Offer</option></select></label><label>Date applied *<input id="dateApplied" type="date" required></label><label class="full-width">Notes<textarea id="notes" rows="4" maxlength="1000"></textarea></label></div><div class="modal-actions"><button type="button" class="secondary-button" id="cancel-modal">Cancel</button><button class="primary-button" id="save-job">Save application</button></div></form></dialog>
+
+  <!-- Modal: Add / Edit Application -->
+  <dialog id="job-dialog">
+    <form method="dialog" id="job-form">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">OPPORTUNITY DETAILS</p>
+          <h2 id="modal-title">Add application</h2>
+        </div>
+        <button type="button" class="icon-button" id="close-modal" aria-label="Close dialog">×</button>
+      </div>
+
+      <div id="modal-feedback" class="feedback modal-error-banner" hidden></div>
+      <input type="hidden" id="job-id">
+
+      <div class="form-grid">
+        <label>Company *
+          <input id="company" required maxlength="120" placeholder="e.g. Acme Innovations">
+        </label>
+        <label>Role *
+          <input id="role" required maxlength="120" placeholder="e.g. Senior Backend Engineer">
+        </label>
+        <label>Location
+          <input id="location" maxlength="120" placeholder="e.g. Remote, San Francisco, CA">
+        </label>
+        <label>Compensation / Salary
+          <input id="salary" placeholder="e.g. $140k - $160k" maxlength="80">
+        </label>
+        <label>Application / Job URL
+          <input id="applicationUrl" type="url" placeholder="https://example.com/jobs/123">
+        </label>
+        <label>Status *
+          <select id="status" required>
+            <option value="Applied">Applied</option>
+            <option value="Interview">Interview</option>
+            <option value="Offer">Offer</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </label>
+        <label>Date applied *
+          <input id="dateApplied" type="date" required>
+        </label>
+        <label class="full-width">Notes & Next Steps
+          <textarea id="notes" rows="4" maxlength="1000" placeholder="Recruiter notes, interview schedule, referral info..."></textarea>
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary-button" id="cancel-modal">Cancel</button>
+        <button class="primary-button" id="save-job">Save application</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal: View Application Details -->
+  <dialog id="details-dialog">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow">APPLICATION OVERVIEW</p>
+        <h2 id="details-company-name">Company</h2>
+        <p id="details-role-title" class="details-role-subhead">Role Title</p>
+      </div>
+      <button type="button" class="icon-button" id="close-details" aria-label="Close details">×</button>
+    </div>
+
+    <div class="details-body">
+      <div class="details-meta-grid">
+        <div class="detail-item">
+          <span class="detail-label">Status</span>
+          <span id="details-status-badge" class="status">Applied</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Date Applied</span>
+          <strong id="details-date">—</strong>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Location</span>
+          <strong id="details-location">—</strong>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Compensation</span>
+          <strong id="details-salary">—</strong>
+        </div>
+      </div>
+
+      <div class="detail-item full-width" id="details-url-row">
+        <span class="detail-label">Listing Link</span>
+        <a id="details-url-link" href="#" target="_blank" rel="noopener noreferrer" class="external-link">Open job listing ↗</a>
+      </div>
+
+      <div class="detail-item full-width">
+        <span class="detail-label">Notes & Comments</span>
+        <div id="details-notes" class="notes-content">No notes provided for this opportunity.</div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="secondary-button" id="details-delete-btn">Delete</button>
+      <button type="button" class="primary-button" id="details-edit-btn">Edit application</button>
+    </div>
+  </dialog>
+
+  <!-- Modal: Sign In / Create Account -->
+  <dialog id="auth-dialog">
+    <div class="auth-card">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">NORTHSTAR CAREER PLATFORM</p>
+          <h2 id="auth-modal-title">Sign in to your account</h2>
+        </div>
+        <button type="button" class="icon-button" id="close-auth-modal" aria-label="Close dialog">×</button>
+      </div>
+
+      <div class="auth-toggle-bar">
+        <button type="button" class="auth-toggle-btn active" id="auth-tab-signin">Sign In</button>
+        <button type="button" class="auth-toggle-btn" id="auth-tab-register">Create Account</button>
+      </div>
+
+      <div id="auth-feedback" class="feedback modal-error-banner" hidden></div>
+
+      <form id="auth-form">
+        <div class="form-grid auth-grid">
+          <label id="auth-name-row" class="full-width" style="display:none">Full Name *
+            <input id="auth-name" placeholder="e.g. Alex Mercer" maxlength="80">
+          </label>
+          <label class="full-width">Work Email *
+            <input id="auth-email" type="email" required placeholder="alex@company.com" autocomplete="email">
+          </label>
+          <label class="full-width">Password *
+            <input id="auth-password" type="password" required placeholder="••••••••" minlength="6" maxlength="100" autocomplete="current-password">
+            <small class="field-hint" id="auth-password-hint" style="display:none">Minimum 6 characters</small>
+          </label>
+        </div>
+
+        <div class="auth-actions">
+          <button type="submit" class="primary-button full-width" id="auth-submit-btn">Sign In to Northstar</button>
+          <div class="auth-divider"><span>or test immediately</span></div>
+          <button type="button" class="secondary-button full-width demo-login-btn" id="auth-demo-btn">
+            <span>✦</span> Quick Login with Demo Account
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
   <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
